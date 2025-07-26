@@ -1,11 +1,9 @@
-feat: Implement background timer, add LP, and favicon
+feat: Implement PWA features and background timer improvements
 
-This commit introduces significant new features and improvements:
-- **Background Timer:** Implemented a robust background timer using Date.now() and visibilitychange event, ensuring timer accuracy even when the browser tab is not active.
-- **Landing Page (LP):** Created a dedicated landing page (lp.html and lp.css) based on the QUEST formula to effectively introduce the "Pomo Shacho" app and its benefits.
-- **Favicon:** Added a favicon (favicon.png) to enhance brand recognition in browser tabs and bookmarks.
+This commit focuses on enhancing the app's Progressive Web App (PWA) capabilities and refining the background timer:
+- **PWA Integration:** Added `manifest.json` and `apple-touch-icon` to enable "Add to Home Screen" functionality on mobile devices, providing an app-like experience.
+- **Background Timer Refinement:** Further improved the background timer logic to ensure accurate time tracking and alarm triggering even when the app is not in the foreground.
 - **UI/UX Enhancements:**
-  - Added a "Help" button and modal with detailed explanations of the Pomodoro Technique, scientific evidence, in-game usage, and strategy tips.
-  - Implemented auto-save functionality every 30 seconds.
-  - Ensured "FUJIMO GAMES" credit is visible during timer display.
-  - Adjusted "Game Start" button logic for better user experience.
+  - Added a descriptive text about the Pomodoro Technique's benefits on the opening screen.
+  - Adjusted the main "Start Focus" button and other action buttons layout for better visibility and user flow.
+  - Ensured "FUJIMO GAMES" credit is consistently visible.

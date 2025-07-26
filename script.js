@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // タイマーの状態を追加
         timerRunning: false,
         timerEndTime: 0,
-        isPomodoroActive: true,
+        isPomodoro: true, // ポモドーロ中か休憩中か (true: ポモドーロ, false: 休憩)
     };
     let gameState = { ...initialGameState }; // 初期状態をコピー
 
@@ -83,12 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 保存されたタイマーが実行中であれば再開
                 if (gameState.timerRunning && gameState.timerEndTime > Date.now()) {
                     console.log("【init】実行中のタイマーを再開します。残り時間: ", Math.ceil((gameState.timerEndTime - Date.now()) / 1000), "秒");
-                    isPomodoro = gameState.isPomodoroActive;
                     startTimer(Math.ceil((gameState.timerEndTime - Date.now()) / 1000)); // 残り時間でタイマーを再開
                 } else if (gameState.timerRunning && gameState.timerEndTime <= Date.now()) {
                     // タイマーがバックグラウンドで終了していた場合
                     console.log("【init】タイマーがバックグラウンドで終了していました。完了処理を実行します。");
-                    isPomodoro = gameState.isPomodoroActive;
                     completeTimer(); // タイマー終了処理を直接呼び出す
                 }
                 return;
@@ -157,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         gameState.timerRunning = true;
-        gameState.isPomodoroActive = isPomodoro; // 現在のタイマーがポモドーロか休憩かを保存
         gameState.timerEndTime = Date.now() + duration * 1000; // 終了時刻をミリ秒で記録
         saveGame(); // タイマーの状態を保存
         console.log("【startTimer】gameStateにタイマー状態を保存しました。timerRunning:", gameState.timerRunning, "timerEndTime:", gameState.timerEndTime);
@@ -197,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playBeep();
         vibrate();
 
-        if (isPomodoro) {
+        if (gameState.isPomodoro) { // isPomodoroをgameStateから参照
             showNotification('集中時間終了！', '5分間の休憩に入りましょう。');
             completePomodoroLogic(); // ポモドーロ完了時のロジック
         } else {
@@ -205,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startPomodoroButton.style.display = 'block';
             startBreakButton.style.display = 'none';
         }
-        isPomodoro = !isPomodoro; // 次のタイマータイプに切り替え
+        gameState.isPomodoro = !gameState.isPomodoro; // 次のタイマータイプに切り替え
         console.log("【completeTimer】タイマー完了処理が終了しました。");
     }
 
@@ -342,10 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startPomodoroButton.addEventListener('click', () => {
         console.log("【startPomodoroButton】'集中開始'ボタンがクリックされました。");
+        gameState.isPomodoro = true; // ポモドーロタイマーであることを設定
         startTimer(25 * 60);
     });
     startBreakButton.addEventListener('click', () => {
         console.log("【startBreakButton】'休憩開始'ボタンがクリックされました。");
+        gameState.isPomodoro = false; // 休憩タイマーであることを設定
         startTimer(5 * 60);
     });
     collectionButton.addEventListener('click', () => {

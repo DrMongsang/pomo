@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 保存されたタイマーが実行中であれば再開
                 if (gameState.timerRunning && gameState.timerEndTime > Date.now()) {
-                    console.log("【init】実行中のタイマーを再開します。");
+                    console.log("【init】実行中のタイマーを再開します。残り時間: ", Math.ceil((gameState.timerEndTime - Date.now()) / 1000), "秒");
                     isPomodoro = gameState.isPomodoroActive;
                     startTimer(Math.ceil((gameState.timerEndTime - Date.now()) / 1000)); // 残り時間でタイマーを再開
                 } else if (gameState.timerRunning && gameState.timerEndTime <= Date.now()) {
@@ -149,20 +149,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startTimer(duration) {
+        console.log("【startTimer】タイマー開始関数が呼ばれました。Duration: ", duration);
         // 既存のタイマーがあればクリア
         if (timerInterval) {
             clearInterval(timerInterval);
+            console.log("【startTimer】既存のタイマーをクリアしました。");
         }
 
         gameState.timerRunning = true;
         gameState.isPomodoroActive = isPomodoro; // 現在のタイマーがポモドーロか休憩かを保存
         gameState.timerEndTime = Date.now() + duration * 1000; // 終了時刻をミリ秒で記録
         saveGame(); // タイマーの状態を保存
+        console.log("【startTimer】gameStateにタイマー状態を保存しました。timerRunning:", gameState.timerRunning, "timerEndTime:", gameState.timerEndTime);
 
         timerScreen.style.display = 'flex';
+        console.log("【startTimer】timerScreenのdisplayをflexに設定しました。");
         updateTimerDisplay(); // 初回表示
 
         timerInterval = setInterval(updateTimerDisplay, 1000); // 1秒ごとに更新
+        console.log("【startTimer】setIntervalを開始しました。");
     }
 
     function updateTimerDisplay() {
@@ -173,12 +178,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const displaySeconds = seconds % 60;
         timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
 
+        // console.log("【updateTimerDisplay】残り時間: ", seconds, "秒"); // 毎秒ログは多すぎるのでコメントアウト
+
         if (remainingTimeMs <= 0) {
+            console.log("【updateTimerDisplay】残り時間が0以下になりました。completeTimerを呼び出します。");
             completeTimer();
         }
     }
 
     function completeTimer() {
+        console.log("【completeTimer】タイマー完了処理を開始します。");
         clearInterval(timerInterval);
         timerInterval = null;
         timerScreen.style.display = 'none';
@@ -197,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startBreakButton.style.display = 'none';
         }
         isPomodoro = !isPomodoro; // 次のタイマータイプに切り替え
+        console.log("【completeTimer】タイマー完了処理が終了しました。");
     }
 
     function completePomodoroLogic() {
@@ -325,13 +335,19 @@ document.addEventListener('DOMContentLoaded', () => {
             startAutoSave(); // ゲーム開始時にオートセーブを開始
             console.log("【startGameButton】メインアプリを表示し、UIを更新しました。");
         } else {
-            alert('社長の名前を入力してください！');
+            alert('名前を入力してください！');
             console.log("【startGameButton】名前が入力されていません。アラートを表示しました。");
         }
     });
 
-    startPomodoroButton.addEventListener('click', () => startTimer(25 * 60));
-    startBreakButton.addEventListener('click', () => startTimer(5 * 60));
+    startPomodoroButton.addEventListener('click', () => {
+        console.log("【startPomodoroButton】'集中開始'ボタンがクリックされました。");
+        startTimer(25 * 60);
+    });
+    startBreakButton.addEventListener('click', () => {
+        console.log("【startBreakButton】'休憩開始'ボタンがクリックされました。");
+        startTimer(5 * 60);
+    });
     collectionButton.addEventListener('click', () => {
         renderEmployeeCollection();
         collectionScreen.style.display = 'flex';
@@ -364,6 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ページが非表示から表示に戻ったときにタイマーを更新
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden && gameState.timerRunning) {
+            console.log("【visibilitychange】ページがアクティブになりました。タイマーを更新します。");
             updateTimerDisplay();
         }
     });

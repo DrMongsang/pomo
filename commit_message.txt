@@ -1,10 +1,11 @@
-feat: Add background alarm, vibration, help screen, and UI enhancements
+feat: Implement background timer, add LP, and favicon
 
-This commit introduces several new features and improvements:
-- Implemented Web Notifications API for background alarms and added vibration using Web Vibration API.
-- Added a dedicated help screen with detailed explanations of the Pomodoro Technique, its scientific evidence, in-game usage, and strategy tips.
-- Enhanced UI:
-  - Centralized and enlarged the main "Start Focus" button.
-  - Arranged other action buttons (Collection, Achievements, Help, Settings) below the main button.
-  - Moved "FUJIMO GAMES" credit to the main app's footer, ensuring visibility even during timer display.
-  - Adjusted timer screen overlay to only cover the main content area, keeping header and footer visible.
+This commit introduces significant new features and improvements:
+- **Background Timer:** Implemented a robust background timer using Date.now() and visibilitychange event, ensuring timer accuracy even when the browser tab is not active.
+- **Landing Page (LP):** Created a dedicated landing page (lp.html and lp.css) based on the QUEST formula to effectively introduce the "Pomo Shacho" app and its benefits.
+- **Favicon:** Added a favicon (favicon.png) to enhance brand recognition in browser tabs and bookmarks.
+- **UI/UX Enhancements:**
+  - Added a "Help" button and modal with detailed explanations of the Pomodoro Technique, scientific evidence, in-game usage, and strategy tips.
+  - Implemented auto-save functionality every 30 seconds.
+  - Ensured "FUJIMO GAMES" credit is visible during timer display.
+  - Adjusted "Game Start" button logic for better user experience.

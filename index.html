@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポモ社長</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="opening-screen">
+        <h2>あなたの名前を決めてください</h2>
+        <input type="text" id="shacho-name-input" placeholder="例：ぽも太郎">
+        <button id="start-game-button">ゲーム開始</button>
+    </div>
+
+    <div id="app" style="display: none;">
+        <header>
+            <div id="shacho-status">
+                <h2 id="shacho-name"></h2>
+            </div>
+            <div id="status">
+                <h1 id="rank">平社員</h1>
+                <div id="xp-bar-container">
+                    <div id="xp-bar"></div>
+                </div>
+                <p id="xp-text">XP: 0 / 10</p>
+            </div>
+            <div id="employee-count">社員数: 0人</div>
+        </header>
+        <main>
+            <div id="office">
+                <!-- 社員キャラクターがここに追加されます -->
+            </div>
+        </main>
+        <footer>
+            <button id="start-pomodoro">集中開始</button>
+            <button id="start-break" style="display: none;">休憩開始</button>
+            <button id="collection-button">図鑑</button>
+            <button id="achievements-button">実績</button>
+            <button id="settings-button">設定</button>
+            <div id="credits">FUJIMO GAMES</div>
+        </footer>
+    </div>
+
+    <div id="timer-screen" style="display: none;">
+        <div id="timer">25:00</div>
+    </div>
+
+    <div id="collection-screen" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>社員図鑑</h2>
+            <div id="employee-collection"></div>
+            <button id="close-collection">閉じる</button>
+        </div>
+    </div>
+
+    <div id="achievements-screen" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>実績一覧</h2>
+            <div id="achievements-list"></div>
+            <button id="close-achievements">閉じる</button>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>設定</h2>
+            <button id="reset-game-button">ゲームをリセット</button>
+            <button id="close-settings">閉じる</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

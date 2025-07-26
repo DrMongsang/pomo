@@ -1,0 +1,304 @@
+/* Google Fonts - DotGothic16 */
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
+body {
+    font-family: 'DotGothic16', monospace; /* ドット絵に合うフォント */
+    background-color: #9bbc0f; /* ゲームボーイカラーの画面外の色を意識 */
+    color: #0f380f; /* ゲームボーイカラーの文字色 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 画面いっぱいに広げる */
+    margin: 0;
+    padding: 20px; /* 周囲に余白 */
+    box-sizing: border-box;
+}
+
+/* 全体コンテナ - ゲームボーイカラーの画面 */
+#app, #opening-screen {
+    width: 320px; /* ゲームボーイカラーの画面サイズを意識 */
+    height: 568px; /* 縦長に調整 */
+    border: 8px solid #0f380f; /* 画面の枠 */
+    border-radius: 15px; /* 角を丸く */
+    background-color: #8bac0f; /* 画面の背景色 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5); /* 画面の奥行き */
+}
+
+/* オープニング画面 */
+#opening-screen {
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#opening-screen h2 {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+#opening-screen input {
+    width: 80%;
+    padding: 8px;
+    margin-bottom: 20px;
+    border: 2px solid #0f380f;
+    background-color: #c0d860;
+    color: #0f380f;
+    font-family: 'DotGothic16', monospace;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+/* メインアプリのヘッダー */
+header {
+    padding: 10px;
+    border-bottom: 2px solid #0f380f;
+    background-color: #8bac0f;
+    text-align: center;
+}
+
+#shacho-status {
+    margin-bottom: 5px;
+}
+
+#shacho-name {
+    font-size: 1.2em;
+    margin: 0;
+}
+
+#status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9em;
+}
+
+#xp-bar-container {
+    flex-grow: 1;
+    height: 15px;
+    border: 1px solid #0f380f;
+    background-color: #c0d860;
+    margin: 0 10px;
+}
+
+#xp-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #0f380f;
+}
+
+#employee-count {
+    white-space: nowrap;
+}
+
+/* メインコンテンツエリア */
+main {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #8bac0f;
+    position: relative; /* タイマー画面の基準点 */
+}
+
+#office {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: center; /* 中央寄せ */
+    gap: 10px; /* 社員間のスペース */
+}
+
+/* キャラクターのスタイル */
+.employee {
+    width: 40px; /* 少し小さく */
+    height: 40px;
+    position: relative;
+    border: 2px solid #0f380f;
+    border-radius: 5px; /* 角を丸く */
+    animation: bobbing 2s ease-in-out infinite;
+    box-sizing: border-box; /* borderを含めてサイズ計算 */
+}
+
+/* 左目 */
+.employee::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 8px;
+    width: 6px;
+    height: 6px;
+    background-color: #0f380f;
+    border-radius: 50%;
+}
+
+/* 右目 */
+.employee::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    background-color: #0f380f;
+    border-radius: 50%;
+}
+
+/* 上下にぷかぷか動くアニメーション */
+@keyframes bobbing {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+    100% { transform: translateY(0px); }
+}
+
+/* フッター */
+footer {
+    padding: 10px;
+    border-top: 2px solid #0f380f;
+    background-color: #8bac0f;
+    display: flex;
+    flex-wrap: wrap; /* ボタンが多すぎたら折り返す */
+    justify-content: space-around;
+    align-items: center; /* 垂直方向中央揃え */
+    gap: 5px; /* ボタン間のスペース */
+}
+
+#credits {
+    font-size: 0.7em;
+    color: #0f380f;
+    text-align: center;
+    width: 100%; /* フッター内で横幅いっぱいに */
+    margin-top: 5px;
+}
+
+/* ボタンの共通スタイル */
+button {
+    font-family: 'DotGothic16', monospace;
+    padding: 8px 12px;
+    border: 2px solid #0f380f;
+    border-radius: 5px;
+    background-color: #c0d860; /* ボタンの背景色 */
+    color: #0f380f;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #0f380f; /* 立体感 */
+    transition: all 0.05s linear; /* クリック時のアニメーション */
+}
+
+button:active {
+    transform: translate(1px, 1px); /* 押された感じ */
+    box-shadow: 1px 1px 0 #0f380f;
+}
+
+/* リセットボタンの特別なスタイル */
+#reset-game-button {
+    background-color: #ff0000; /* 赤色 */
+    color: #fff;
+    box-shadow: 2px 2px 0 #a00000;
+}
+
+#reset-game-button:active {
+    box-shadow: 1px 1px 0 #a00000;
+}
+
+/* タイマー画面 */
+#timer-screen {
+    position: absolute; /* main要素を基準に配置 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 56, 15, 0.9); /* 暗い緑のオーバーレイ */
+    color: #9bbc0f; /* 明るい緑の文字 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4em;
+    text-shadow: 2px 2px #0f380f; /* 文字に影 */
+    z-index: 99; /* モーダルより手前、アプリのコンテンツより奥 */
+}
+
+/* モーダル（図鑑、実績、設定） */
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 56, 15, 0.9); /* 暗い緑のオーバーレイ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100; /* 最前面に表示 */
+}
+
+.modal-content {
+    background-color: #8bac0f; /* 画面の背景色 */
+    padding: 20px;
+    border-radius: 10px;
+    border: 4px solid #0f380f;
+    width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    color: #0f380f;
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+
+.modal-content button {
+    margin-top: 15px;
+    display: block;
+    width: 100%;
+}
+
+/* 社員図鑑カード */
+.employee-card {
+    border: 2px solid #0f380f;
+    background-color: #c0d860;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.employee-card h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+}
+
+.employee-card button {
+    width: auto;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+.employee-card input {
+    width: calc(100% - 70px); /* ボタンの幅を考慮 */
+    padding: 5px;
+    border: 1px solid #0f380f;
+    background-color: #e0f8d0;
+    color: #0f380f;
+    font-family: 'DotGothic16', monospace;
+    font-size: 1em;
+}
+
+/* 実績カード */
+.achievement {
+    border: 2px solid #0f380f;
+    background-color: #c0d860;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.achievement h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+}

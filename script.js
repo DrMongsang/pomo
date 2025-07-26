@@ -42,9 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
         xpToNextLevel: 10,
         employees: 0,
         pomodorosCompleted: 0,
-        totalFocusTime: 0, // 総集中時間を追加
+        totalFocusTime: 0,
         achievements: [],
         employeeCollection: [],
+        // タイマーの状態を追加
+        timerRunning: false,
+        timerEndTime: 0,
+        isPomodoroActive: true,
     };
     let gameState = { ...initialGameState }; // 初期状態をコピー
 
@@ -58,7 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '近藤', '坂本', '遠藤', '青木', '福田', '西村', '太田', '藤原', '原田', '中島',
     ];
     const achievements = [{ id: 'first_pomodoro', name: '初めの第一歩', description: '初めてのポモドーロを完了した。' }, { id: 'ten_pomodoros', name: '集中力の達人', description: '10回のポモドーロを完了した。' }, { id: 'rank_up', name: '昇進おめでとう！', description: '初めて昇進した。' }];
-    let timerInterval; let isPomodoro = true;
+    let timerInterval; // setIntervalのIDを保持
+    let autoSaveInterval;
 
     // --- 初期化処理 ---
     function init() {
@@ -73,6 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("【init】社長名が設定されているため、メイン画面を表示します。");
                 showMainApp();
                 updateUI();
+                startAutoSave(); // オートセーブを開始
+
+                // 保存されたタイマーが実行中であれば再開
+                if (gameState.timerRunning && gameState.timerEndTime > Date.now()) {
+                    console.log("【init】実行中のタイマーを再開します。");
+                    isPomodoro = gameState.isPomodoroActive;
+                    startTimer(Math.ceil((gameState.timerEndTime - Date.now()) / 1000)); // 残り時間でタイマーを再開
+                } else if (gameState.timerRunning && gameState.timerEndTime <= Date.now()) {
+                    // タイマーがバックグラウンドで終了していた場合
+                    console.log("【init】タイマーがバックグラウンドで終了していました。完了処理を実行します。");
+                    isPomodoro = gameState.isPomodoroActive;
+                    completeTimer(); // タイマー終了処理を直接呼び出す
+                }
                 return;
             }
         }
@@ -131,37 +149,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startTimer(duration) {
-        let timer = duration;
+        // 既存のタイマーがあればクリア
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+
+        gameState.timerRunning = true;
+        gameState.isPomodoroActive = isPomodoro; // 現在のタイマーがポモドーロか休憩かを保存
+        gameState.timerEndTime = Date.now() + duration * 1000; // 終了時刻をミリ秒で記録
+        saveGame(); // タイマーの状態を保存
+
         timerScreen.style.display = 'flex';
-        updateTimerDisplay(timer);
-        timerInterval = setInterval(() => {
-            timer--;
-            updateTimerDisplay(timer);
-            if (timer <= 0) {
-                clearInterval(timerInterval);
-                timerScreen.style.display = 'none';
-                playBeep();
-                vibrate(); // バイブレーションを追加
-                if (isPomodoro) {
-                    showNotification('集中時間終了！', '5分間の休憩に入りましょう。');
-                    completePomodoro();
-                } else {
-                    showNotification('休憩時間終了！', '次の集中時間に移りましょう。');
-                    startPomodoroButton.style.display = 'block';
-                    startBreakButton.style.display = 'none';
-                }
-                isPomodoro = !isPomodoro;
-            }
-        }, 1000);
+        updateTimerDisplay(); // 初回表示
+
+        timerInterval = setInterval(updateTimerDisplay, 1000); // 1秒ごとに更新
     }
 
-    function updateTimerDisplay(time) {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    function updateTimerDisplay() {
+        const remainingTimeMs = gameState.timerEndTime - Date.now();
+        const seconds = Math.max(0, Math.floor(remainingTimeMs / 1000)); // 残り秒数を計算（0未満にならないように）
+
+        const minutes = Math.floor(seconds / 60);
+        const displaySeconds = seconds % 60;
+        timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+
+        if (remainingTimeMs <= 0) {
+            completeTimer();
+        }
     }
 
-    function completePomodoro() {
+    function completeTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerScreen.style.display = 'none';
+        gameState.timerRunning = false; // タイマー終了
+        saveGame(); // タイマーの状態を保存
+
+        playBeep();
+        vibrate();
+
+        if (isPomodoro) {
+            showNotification('集中時間終了！', '5分間の休憩に入りましょう。');
+            completePomodoroLogic(); // ポモドーロ完了時のロジック
+        } else {
+            showNotification('休憩時間終了！', '次の集中時間に移りましょう。');
+            startPomodoroButton.style.display = 'block';
+            startBreakButton.style.display = 'none';
+        }
+        isPomodoro = !isPomodoro; // 次のタイマータイプに切り替え
+    }
+
+    function completePomodoroLogic() {
         gameState.xp += 5;
         gameState.pomodorosCompleted++;
         gameState.totalFocusTime += 25; // 25分集中したとして加算
@@ -244,14 +282,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveGame() { localStorage.setItem('pomoShachoState', JSON.stringify(gameState)); }
 
+    function startAutoSave() {
+        // 30秒ごとに自動保存
+        autoSaveInterval = setInterval(() => {
+            saveGame();
+            console.log("【オートセーブ】ゲームの状態を自動保存しました。");
+        }, 30 * 1000); 
+    }
+
+    function stopAutoSave() {
+        if (autoSaveInterval) {
+            clearInterval(autoSaveInterval);
+            autoSaveInterval = null;
+        }
+    }
+
     function resetGame() {
         console.log("【resetGame】リセット処理を開始します。");
         if (confirm('本当にゲームデータをリセットしますか？全ての進行状況が失われます。\nこの操作は元に戻せません。')) {
             console.log("【resetGame】ユーザーがリセットを承認しました。localStorageをクリアします。");
             localStorage.removeItem('pomoShachoState');
+            // メモリ上のgameStateも初期値に戻す
             gameState = { ...initialGameState };
+            stopAutoSave(); // オートセーブを停止
             console.log("【resetGame】gameStateを初期化しました。ページをリロードします。");
-            location.reload();
+            location.reload(); // ページをリロードして初期状態に戻す
         } else {
             console.log("【resetGame】ユーザーがリセットをキャンセルしました。");
         }
@@ -267,9 +322,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("【startGameButton】gameState.shachoNameを設定しました: ", gameState.shachoName);
             showMainApp();
             updateUI();
+            startAutoSave(); // ゲーム開始時にオートセーブを開始
             console.log("【startGameButton】メインアプリを表示し、UIを更新しました。");
         } else {
-            alert('名前を入力してください！');
+            alert('社長の名前を入力してください！');
             console.log("【startGameButton】名前が入力されていません。アラートを表示しました。");
         }
     });
@@ -300,7 +356,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeRankUpButton.addEventListener('click', () => rankUpScreen.style.display = 'none');
 
-    window.addEventListener('beforeunload', saveGame);
+    window.addEventListener('beforeunload', () => {
+        saveGame();
+        stopAutoSave(); // ページを離れる際にオートセーブを停止
+    });
+
+    // ページが非表示から表示に戻ったときにタイマーを更新
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && gameState.timerRunning) {
+            updateTimerDisplay();
+        }
+    });
 
     // --- 初期化の実行 ---
     init();

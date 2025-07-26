@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const xpText = document.getElementById('xp-text');
     const employeeCountElement = document.getElementById('employee-count');
     const office = document.getElementById('office');
+    const employeeContainer = document.getElementById('employee-container');
     const startPomodoroButton = document.getElementById('start-pomodoro');
     const startBreakButton = document.getElementById('start-break');
     const timerElement = document.getElementById('timer');
@@ -26,6 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsScreen = document.getElementById('settings-screen');
     const closeSettingsButton = document.getElementById('close-settings');
     const resetGameButton = document.getElementById('reset-game-button');
+    const helpButton = document.getElementById('help-button');
+    const helpScreen = document.getElementById('help-screen');
+    const closeHelpButton = document.getElementById('close-help');
+    const rankUpScreen = document.getElementById('rank-up-screen');
+    const newRankDisplay = document.getElementById('new-rank-display');
+    const closeRankUpButton = document.getElementById('close-rank-up');
 
     // ゲームの状態を管理するオブジェクト (初期値)
     const initialGameState = {
@@ -35,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         xpToNextLevel: 10,
         employees: 0,
         pomodorosCompleted: 0,
+        totalFocusTime: 0, // 総集中時間を追加
         achievements: [],
         employeeCollection: [],
     };
@@ -42,11 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // マスターデータ
     const ranks = ['平社員', '主任', '係長', '課長', '次長', '部長', '本部長', '常務', '専務', '副社長', '社長', '会長', '神'];
-    const employeeTypes = [
-        { type: '新人', color: '#ffadad' }, // 赤系
-        { type: '中堅', color: '#ffd6a5' }, // オレンジ系
-        { type: 'ベテラン', color: '#caffbf' }, // 緑系
-    ];
+    const employeeTypes = [{ type: '新人', color: '#ffadad' }, { type: '中堅', color: '#ffd6a5' }, { type: 'ベテラン', color: '#caffbf' }];
     const randomNames = [
         '田中', '佐藤', '鈴木', '高橋', '渡辺', '伊藤', '中村', '小林', '加藤', '吉田',
         '山田', '佐々木', '山口', '松本', '井上', '木村', '林', '斎藤', '清水', '山崎',
@@ -59,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 初期化処理 ---
     function init() {
         console.log("【init】初期化処理を開始します。");
+        requestNotificationPermission(); // 通知の許可をリクエスト
         const savedState = localStorage.getItem('pomoShachoState');
         if (savedState) {
             console.log("【init】localStorageに保存されたデータが見つかりました。");
@@ -76,14 +81,32 @@ document.addEventListener('DOMContentLoaded', () => {
         showOpeningScreen();
     }
 
+    function requestNotificationPermission() {
+        if (!('Notification' in window)) {
+            console.warn("このブラウザは通知をサポートしていません。");
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.log("通知の許可が得られました。");
+            } else if (permission === "denied") {
+                console.warn("通知が拒否されました。");
+            } else {
+                console.log("通知の許可が保留されています。");
+            }
+        });
+    }
+
     function showOpeningScreen() {
-        openingScreen.style.display = 'block';
+        console.log("【showOpeningScreen】オープニング画面を表示します。");
+        openingScreen.style.display = 'flex'; // flexに変更
         appScreen.style.display = 'none';
     }
 
     function showMainApp() {
+        console.log("【showMainApp】メインアプリ画面を表示します。");
         openingScreen.style.display = 'none';
-        appScreen.style.display = 'block';
+        appScreen.style.display = 'flex'; // flexに変更
     }
 
     // --- 主要な関数 ---
@@ -98,12 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAllEmployees() {
-        office.innerHTML = '';
+        employeeContainer.innerHTML = '';
         gameState.employeeCollection.forEach(employee => {
             const employeeElement = document.createElement('div');
             employeeElement.classList.add('employee');
             employeeElement.style.backgroundColor = employee.color;
-            office.appendChild(employeeElement);
+            employeeContainer.appendChild(employeeElement);
         });
     }
 
@@ -118,8 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(timerInterval);
                 timerScreen.style.display = 'none';
                 playBeep();
-                if (isPomodoro) completePomodoro();
-                else { startPomodoroButton.style.display = 'block'; startBreakButton.style.display = 'none'; }
+                vibrate(); // バイブレーションを追加
+                if (isPomodoro) {
+                    showNotification('集中時間終了！', '5分間の休憩に入りましょう。');
+                    completePomodoro();
+                } else {
+                    showNotification('休憩時間終了！', '次の集中時間に移りましょう。');
+                    startPomodoroButton.style.display = 'block';
+                    startBreakButton.style.display = 'none';
+                }
                 isPomodoro = !isPomodoro;
             }
         }, 1000);
@@ -134,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function completePomodoro() {
         gameState.xp += 5;
         gameState.pomodorosCompleted++;
+        gameState.totalFocusTime += 25; // 25分集中したとして加算
         unlockAchievement('first_pomodoro');
         if (gameState.pomodorosCompleted >= 10) unlockAchievement('ten_pomodoros');
         if (gameState.employees < 10) {
@@ -152,9 +183,26 @@ document.addEventListener('DOMContentLoaded', () => {
         startBreakButton.style.display = 'block';
     }
 
-    function checkRankUp() { if (gameState.xp >= gameState.xpToNextLevel) { const i = ranks.indexOf(gameState.rank); if (i < ranks.length - 1) { gameState.rank = ranks[i + 1]; gameState.xp = 0; gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5); unlockAchievement('rank_up'); } } }
+    function checkRankUp() {
+        if (gameState.xp >= gameState.xpToNextLevel) {
+            const currentRankIndex = ranks.indexOf(gameState.rank);
+            if (currentRankIndex < ranks.length - 1) {
+                gameState.rank = ranks[currentRankIndex + 1];
+                gameState.xp = 0;
+                gameState.xpToNextLevel = Math.floor(gameState.xpToNextLevel * 1.5);
+                unlockAchievement('rank_up');
+                showRankUpScreen(gameState.rank); // 昇進演出を表示
+            }
+        }
+    }
     function unlockAchievement(id) { if (!gameState.achievements.includes(id)) gameState.achievements.push(id); }
-    function renderAchievements() { const el = document.getElementById('achievements-list'); el.innerHTML = ''; achievements.forEach(a => { if (gameState.achievements.includes(a.id)) { const e = document.createElement('div'); e.innerHTML = `<h3>${a.name}</h3><p>${a.description}</p>`; el.appendChild(e); } }); }
+    function renderAchievements() {
+        const achievementsList = document.getElementById('achievements-list');
+        const totalFocusTimeElement = document.getElementById('total-focus-time');
+        totalFocusTimeElement.textContent = `総集中時間: ${gameState.totalFocusTime}分`;
+        achievementsList.innerHTML = '';
+        achievements.forEach(a => { if (gameState.achievements.includes(a.id)) { const e = document.createElement('div'); e.innerHTML = `<h3>${a.name}</h3><p>${a.description}</p>`; el.appendChild(e); } });
+    }
 
     function renderEmployeeCollection() {
         const employeeCollectionElement = document.getElementById('employee-collection');
@@ -169,26 +217,23 @@ document.addEventListener('DOMContentLoaded', () => {
             employeeCollectionElement.appendChild(employeeCard);
         });
 
-        // 編集ボタンのイベントリスナーを設定
         document.querySelectorAll('.edit-employee-name').forEach(button => {
             button.addEventListener('click', (event) => {
                 const index = event.target.dataset.index;
                 const currentEmployee = gameState.employeeCollection[index];
                 const nameElement = document.getElementById(`employee-name-${index}`);
 
-                // 編集モードに切り替え
                 nameElement.innerHTML = `
                     <input type="text" id="edit-name-input-${index}" value="${currentEmployee.assignedName}">
                     <button class="save-employee-name" data-index="${index}">保存</button>
                 `;
 
-                // 保存ボタンのイベントリスナーを設定
                 document.querySelector(`.save-employee-name[data-index="${index}"]`).addEventListener('click', (saveEvent) => {
                     const newName = document.getElementById(`edit-name-input-${index}`).value.trim();
                     if (newName) {
                         gameState.employeeCollection[index].assignedName = newName;
-                        saveGame(); // 変更を保存
-                        renderEmployeeCollection(); // 図鑑を再描画して最新の状態にする
+                        saveGame();
+                        renderEmployeeCollection();
                     } else {
                         alert('名前を入力してください！');
                     }
@@ -204,10 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('本当にゲームデータをリセットしますか？全ての進行状況が失われます。\nこの操作は元に戻せません。')) {
             console.log("【resetGame】ユーザーがリセットを承認しました。localStorageをクリアします。");
             localStorage.removeItem('pomoShachoState');
-            // メモリ上のgameStateも初期値に戻す
             gameState = { ...initialGameState };
             console.log("【resetGame】gameStateを初期化しました。ページをリロードします。");
-            location.reload(); // ページをリロードして初期状態に戻す
+            location.reload();
         } else {
             console.log("【resetGame】ユーザーがリセットをキャンセルしました。");
         }
@@ -225,13 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
             updateUI();
             console.log("【startGameButton】メインアプリを表示し、UIを更新しました。");
         } else {
-            alert('社長の名前を入力してください！');
+            alert('名前を入力してください！');
             console.log("【startGameButton】名前が入力されていません。アラートを表示しました。");
         }
     });
 
-    startPomodoroButton.addEventListener('click', () => startTimer(25 * 60)); // 25分に設定
-    startBreakButton.addEventListener('click', () => startTimer(5 * 60)); // 5分に設定
+    startPomodoroButton.addEventListener('click', () => startTimer(25 * 60));
+    startBreakButton.addEventListener('click', () => startTimer(5 * 60));
     collectionButton.addEventListener('click', () => {
         renderEmployeeCollection();
         collectionScreen.style.display = 'flex';
@@ -249,6 +293,13 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSettingsButton.addEventListener('click', () => settingsScreen.style.display = 'none');
     resetGameButton.addEventListener('click', resetGame);
 
+    helpButton.addEventListener('click', () => {
+        helpScreen.style.display = 'flex';
+    });
+    closeHelpButton.addEventListener('click', () => helpScreen.style.display = 'none');
+
+    closeRankUpButton.addEventListener('click', () => rankUpScreen.style.display = 'none');
+
     window.addEventListener('beforeunload', saveGame);
 
     // --- 初期化の実行 ---
@@ -256,4 +307,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 音声再生 ---
     function playBeep() { try { const ac = new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(); const g = ac.createGain(); o.connect(g); g.connect(ac.destination); o.type = 'sine'; o.frequency.setValueAtTime(440, ac.currentTime); g.gain.setValueAtTime(0.5, ac.currentTime); o.start(); o.stop(ac.currentTime + 0.5); } catch (e) { console.error("音声の再生に失敗しました: ", e); } }
+
+    function showRankUpScreen(newRank) {
+        newRankDisplay.textContent = newRank;
+        rankUpScreen.style.display = 'flex';
+    }
+
+    function showNotification(title, body) {
+        if (Notification.permission === "granted") {
+            new Notification(title, { body: body });
+        }
+    }
+
+    function vibrate() {
+        if ("vibrate" in navigator) {
+            navigator.vibrate(200); // 200ミリ秒バイブレーション
+        } else {
+            console.warn("このデバイスはバイブレーションをサポートしていません。");
+        }
+    }
 });

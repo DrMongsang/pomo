@@ -35,9 +35,16 @@ body {
 }
 
 #opening-screen h2 {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-size: 1.5em;
     text-align: center;
+}
+
+.description-text {
+    font-size: 0.9em;
+    margin-bottom: 20px;
+    text-align: center;
+    line-height: 1.4;
 }
 
 #opening-screen input {
@@ -100,11 +107,39 @@ main {
     padding: 10px;
     background-color: #8bac0f;
     position: relative; /* タイマー画面の基準点 */
+    display: flex; /* officeをflexコンテナにする */
+    flex-direction: column; /* 縦並び */
+    align-items: center; /* 中央寄せ */
 }
 
 #office {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column; /* 社長と社員コンテナを縦に並べる */
+    align-items: center; /* 中央寄せ */
+    justify-content: center; /* 垂直方向中央寄せ */
+    gap: 10px; /* 社長と社員コンテナの間隔 */
+}
+
+#shacho-character {
+    background-color: #ff69b4; /* 社長専用の色（ピンク） */
+    width: 60px; /* 社長は少し大きく */
+    height: 60px;
+    border-radius: 50%; /* 丸い形に */
+    margin-bottom: 10px; /* 社員との間隔 */
+}
+
+#shacho-character::before,
+#shacho-character::after {
+    top: 20px; /* 目の位置調整 */
+    width: 10px; /* 目のサイズ調整 */
+    height: 10px;
+}
+
+#employee-container {
+    width: 100%;
+    flex-grow: 1;
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
@@ -160,10 +195,24 @@ footer {
     border-top: 2px solid #0f380f;
     background-color: #8bac0f;
     display: flex;
-    flex-wrap: wrap; /* ボタンが多すぎたら折り返す */
+    flex-direction: column; /* 縦並びにする */
+    align-items: center; /* 中央寄せ */
+    gap: 5px; /* 要素間のスペース */
+}
+
+.main-button {
+    width: 80%; /* 大きくする */
+    padding: 15px 20px;
+    font-size: 1.2em;
+    margin-bottom: 10px; /* 下のボタンとの間隔 */
+}
+
+.sub-buttons {
+    display: flex;
     justify-content: space-around;
-    align-items: center; /* 垂直方向中央揃え */
-    gap: 5px; /* ボタン間のスペース */
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 #credits {

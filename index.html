@@ -9,6 +9,7 @@
 <body>
     <div id="opening-screen">
         <h2>あなたの名前を決めてください</h2>
+        <p class="description-text">ポモドーロテクニックで集中力を高め、生産性を劇的に向上させましょう！</p>
         <input type="text" id="shacho-name-input" placeholder="例：ぽも太郎">
         <button id="start-game-button">ゲーム開始</button>
     </div>
@@ -29,15 +30,21 @@
         </header>
         <main>
             <div id="office">
-                <!-- 社員キャラクターがここに追加されます -->
+                <div id="shacho-character" class="employee"></div>
+                <div id="employee-container">
+                    <!-- 社員キャラクターがここに追加されます -->
+                </div>
             </div>
         </main>
         <footer>
-            <button id="start-pomodoro">集中開始</button>
-            <button id="start-break" style="display: none;">休憩開始</button>
-            <button id="collection-button">図鑑</button>
-            <button id="achievements-button">実績</button>
-            <button id="settings-button">設定</button>
+            <button id="start-pomodoro" class="main-button">集中開始</button>
+            <button id="start-break" class="main-button" style="display: none;">休憩開始</button>
+            <div class="sub-buttons">
+                <button id="collection-button">図鑑</button>
+                <button id="achievements-button">実績</button>
+                <button id="help-button">ヘルプ</button>
+                <button id="settings-button">設定</button>
+            </div>
             <div id="credits">FUJIMO GAMES</div>
         </footer>
     </div>
@@ -57,6 +64,7 @@
     <div id="achievements-screen" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>実績一覧</h2>
+            <p id="total-focus-time">総集中時間: 0分</p>
             <div id="achievements-list"></div>
             <button id="close-achievements">閉じる</button>
         </div>
@@ -67,6 +75,32 @@
             <h2>設定</h2>
             <button id="reset-game-button">ゲームをリセット</button>
             <button id="close-settings">閉じる</button>
+        </div>
+    </div>
+
+    <div id="help-screen" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>ポモドーロテクニックとは？</h2>
+            <p>ポモドーロテクニックは、時間を区切って集中と休憩を繰り返すことで、生産性を高める時間管理術です。25分間の集中と5分間の休憩を1セットとして繰り返します。</p>
+            <h3>科学的エビデンス</h3>
+            <p>このテクニックは、脳の集中力を維持し、疲労を軽減する効果が科学的に示されています。短時間の休憩を挟むことで、情報処理能力が向上し、長期的な記憶にも良い影響を与えると言われています。</p>
+            <h3>このゲームでの使い方</h3>
+            <p>「集中開始」ボタンで25分間のポモドーロを開始し、タイマーが終了したら5分間の休憩に入ります。集中が成功するとXPを獲得し、社員が増え、役職が昇進します。</p>
+            <h3>ゲーム攻略のヒント</h3>
+            <ul>
+                <li>毎日コツコツ集中を続けることが、XP獲得と昇進の鍵です。</li>
+                <li>社員図鑑を埋めて、様々な社員に出会うのも楽しみの一つです。</li>
+                <li>実績を解除して、あなたの集中力を証明しましょう！</li>
+            </ul>
+            <button id="close-help">閉じる</button>
+        </div>
+    </div>
+
+    <div id="rank-up-screen" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>昇進おめでとうございます！</h2>
+            <p>あなたは<span id="new-rank-display"></span>に昇進しました！</p>
+            <button id="close-rank-up">閉じる</button>
         </div>
     </div>
 
